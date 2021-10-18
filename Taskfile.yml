@@ -15,4 +15,4 @@ tasks:
     cmds:
       - 'rm -rf dist'
       - 'mkdir dist'
-      - 'go build -o dist .'
+      - 'CGO_ENABLED=0 go build -ldflags "-s -w " -trimpath -o dist .'
