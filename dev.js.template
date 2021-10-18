@@ -1,0 +1,20 @@
+// @require file://__FILE_PATH__
+// ==/UserScript==
+
+;;(() => {
+  const main = () => {
+    const ws = new WebSocket("ws://127.0.0.1:__PORT__/ws");
+    ws.onmessage = (evt) => {
+      if (evt.data === "reload") {
+        location.href = location.href;
+      }
+    };
+    ws.onclose = (evt) => {
+      window.alert("remote ws closed");
+    };
+    ws.onerror = (evt) => {
+      window.alert(`remote ws error`);
+    };
+  };
+  main();
+})();
