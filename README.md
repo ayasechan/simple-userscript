@@ -2,7 +2,7 @@
 
 Automatically update web pages when user scripts change
 
-Suitable for simple development of single-file scripts
+Suitable for simple development of **single-file** scripts
 
 # usage
 
