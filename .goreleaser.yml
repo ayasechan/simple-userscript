@@ -1,0 +1,52 @@
+project_name: simple-userscript
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+- env:
+    - CGO_ENABLED=0
+  goos:
+    - linux
+    - darwin
+    - windows
+  goarch:
+    - 386
+    - amd64
+    - arm
+    - arm64
+
+  flags:
+    - -trimpath
+  ldflags:
+    - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.date={{ .CommitDate }} -X main.builtBy=goreleaser
+
+checksum:
+  name_template: 'checksums.txt'
+
+release:
+  draft: true
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+    - '^docs'
+    - '^test'
+    - '^chore'
+
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+    - goos: windows
+      format: zip
+    files:
+      - README.md
