@@ -65,7 +65,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveUserJs(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/javascript; charset=utf8")
 	w.Write([]byte(getDevScript()))
 }
 
@@ -78,10 +77,22 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 }
 
 func boardercaster() {
-	for range changedCh {
+	ticker := time.NewTicker(time.Minute)
+	for {
+		messageType := websocket.PingMessage
+		data := []byte{}
+
+		select {
+		case <-changedCh:
+			messageType = websocket.TextMessage
+			data = []byte(message)
+		case <-ticker.C:
+			log.Println("send ping message")
+		}
+
 		for c := range clients {
 			go func(c *websocket.Conn) {
-				err := c.WriteMessage(websocket.TextMessage, []byte(message))
+				err := c.WriteMessage(messageType, data)
 				if err != nil {
 					delete(clients, c)
 					c.Close()
