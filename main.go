@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -35,6 +36,7 @@ var (
 	hasher    = md5.New()
 	clients   = make(map[*websocket.Conn]struct{})
 	changedCh = make(chan struct{})
+	locker    = sync.RWMutex{}
 )
 
 func main() {
@@ -73,6 +75,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	locker.Lock()
+	defer locker.Unlock()
 	clients[c] = struct{}{}
 }
 
@@ -94,6 +98,8 @@ func boardercaster() {
 			go func(c *websocket.Conn) {
 				err := c.WriteMessage(messageType, data)
 				if err != nil {
+					locker.Lock()
+					defer locker.Unlock()
 					delete(clients, c)
 					c.Close()
 				}
